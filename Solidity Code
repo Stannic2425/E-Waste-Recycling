@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+contract EWasteRecycling {
+    struct Waste {
+        uint id;
+        address owner;
+        string description;
+        bool recycled;
+    }
+
+    uint public wasteCount = 0;
+    mapping(uint => Waste) public wastes;
+
+    event WasteAdded(uint id, address owner, string description);
+    event WasteRecycled(uint id, address recycler);
+
+    function addWaste(string memory _description) public {
+        wasteCount++;
+        wastes[wasteCount] = Waste(wasteCount, msg.sender, _description, false);
+        emit WasteAdded(wasteCount, msg.sender, _description);
+    }
+
+    function recycleWaste(uint _id) public {
+        require(wastes[_id].owner != address(0), "Waste not found");
+        require(!wastes[_id].recycled, "Already recycled");
+
+        wastes[_id].recycled = true;
+        emit WasteRecycled(_id, msg.sender);
+    }
+
+    function getWaste(uint _id) public view returns (uint, address, string memory, bool) {
+        Waste memory w = wastes[_id];
+        return (w.id, w.owner, w.description, w.recycled);
+    }
+}
